@@ -3,7 +3,7 @@
 Gem::Specification.new do |s|
   s.name              = 'delayed_job_sequel'
   s.summary           = 'Sequel backend for delayed_job'
-  s.version           = '0.0.1'
+  s.version           = '0.1.0'
   s.authors           = 'Fabrice Armisen'
   s.date              = Date.today.to_s
   s.email             = 'farmisen@gmail.com'
@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency      'activesupport','>= 3.0.0'
   s.add_runtime_dependency      'i18n'
   s.add_runtime_dependency      'delayed_job',  '~> 2.1'
-  s.add_development_dependency  'sqlite3-ruby', '-> 1.2.5'
+  s.add_development_dependency  'sqlite3-ruby', '= 1.2.5'
   s.add_development_dependency  'rspec',        '>= 2.1.0'
   s.add_development_dependency  'rake'
 end

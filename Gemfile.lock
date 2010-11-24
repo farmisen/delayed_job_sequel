@@ -1,6 +1,6 @@
 GIT
-  remote: git://github.com/collectiveidea/delayed_job.git
-  revision: fcca64c20c60b5d93d2ca7ad416ae30e33e588e7
+  remote: git@github.com:farmisen/delayed_job.git
+  revision: 86a33cf840d261e5e3353baaeb99a4ea0779276a
   specs:
     delayed_job (2.1.1)
       activesupport (~> 3.0)

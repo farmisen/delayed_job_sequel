@@ -51,7 +51,9 @@ module Delayed
             filters << "(run_at <= '#{make_db_timestamp(right_now)}' AND (locked_at IS NULL OR locked_at < '#{make_db_timestamp(right_now - max_run_time)}') OR locked_by = '#{worker_name}') AND failed_at IS NULL"
             filters << "priority >= #{Worker.min_priority.to_i}" if Worker.min_priority
             filters << "priority <= #{Worker.max_priority.to_i}" if Worker.max_priority
-            Job.filter(filters.join(' and ')).order(:priority, :run_at).limit(limit).all()
+            ds = Job.filter(filters.join(' and ')).order(:priority.desc, :run_at.asc).limit(limit)
+            p ds.sql
+            ds.all()
           end
 
           # When a worker is exiting, make sure we don't have any locked jobs.
