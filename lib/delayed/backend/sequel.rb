@@ -52,7 +52,6 @@ module Delayed
             filters << "priority >= #{Worker.min_priority.to_i}" if Worker.min_priority
             filters << "priority <= #{Worker.max_priority.to_i}" if Worker.max_priority
             ds = Job.filter(filters.join(' and ')).order(:priority.desc, :run_at.asc).limit(limit)
-            p ds.sql
             ds.all()
           end
 
