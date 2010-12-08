@@ -46,13 +46,12 @@ module Delayed
 
         module ClassMethods
           def find_available(worker_name, limit = 5, max_run_time = Worker.max_run_time)
-            right_now = db_time_now
-            filters   = []
-            filters << "(run_at <= '#{make_db_timestamp(right_now)}' AND (locked_at IS NULL OR locked_at < '#{make_db_timestamp(right_now - max_run_time)}') OR locked_by = '#{worker_name}') AND failed_at IS NULL"
-            filters << "priority >= #{Worker.min_priority.to_i}" if Worker.min_priority
-            filters << "priority <= #{Worker.max_priority.to_i}" if Worker.max_priority
-            ds = Job.filter(filters.join(' and ')).order(:priority.desc, :run_at.asc).limit(limit)
-            ds.all()
+            now = db_time_now
+            scope = Job.where('(run_at <= ? AND (locked_at IS NULL OR locked_at < ?) OR locked_by = ?) AND failed_at IS NULL', 
+                       now, now - max_run_time, worker_name)
+            scope = scope.where(:priority >= Worker.min_priority) if Worker.min_priority
+            scope = scope.where(:priority <= Worker.max_priority) if Worker.max_priority
+            scope.order(:priority.desc, :run_at.asc).limit(limit).all
           end
 
           # When a worker is exiting, make sure we don't have any locked jobs.
@@ -101,20 +100,21 @@ module Delayed
         # Lock this job for this worker.
         # Returns true if we have the lock, false otherwise.
         def lock_exclusively!(max_run_time, worker = worker_name)
-          right_now     = self.class.db_time_now
-          overtime      = right_now - max_run_time.to_i
-
+          now = self.class.db_time_now
           affected_rows = if locked_by != worker
-                            filter = "id = #{id} and (locked_at is null or locked_at < '#{make_db_timestamp(overtime)}') and (run_at <= '#{make_db_timestamp(right_now)}')"
-                            Job.filter(filter).update(:locked_at => right_now, :locked_by => worker)
-                          else
-                            filter = "id = #{id} and locked_by = '#{worker}'"
-                            Job.filter(filter).update(:locked_at => right_now)
-                          end
-
+            # We don't own this job so we will update the locked_by name and the locked_at
+            self.class.filter(:id => id).
+                       filter('(locked_at IS NULL OR locked_at < ?) AND (run_at <= ?)', (now - max_run_time.to_i), now).
+                       update(:locked_at => now, :locked_by => worker)
+          else
+            # We already own this job, this may happen if the job queue crashes.
+            # Simply resume and update the locked_at
+            self.class.filter(:id => id, :locked_by => worker).
+                       update(:locked_at => now)
+          end
           if affected_rows == 1
-            self.locked_at = right_now
-            self.locked_by = worker
+            self.locked_at    = now
+            self.locked_by    = worker
             return true
           else
             return false
