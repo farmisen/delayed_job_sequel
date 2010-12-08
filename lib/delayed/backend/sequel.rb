@@ -51,7 +51,9 @@ module Delayed
                        now, now - max_run_time, worker_name)
             scope = scope.where(:priority >= Worker.min_priority) if Worker.min_priority
             scope = scope.where(:priority <= Worker.max_priority) if Worker.max_priority
-            scope.order(:priority.desc, :run_at.asc).limit(limit).all
+            scope = scope.order(:priority.desc, :run_at.asc).limit(limit)
+            p scope.sql
+            scope.all
           end
 
           # When a worker is exiting, make sure we don't have any locked jobs.
