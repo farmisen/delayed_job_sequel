@@ -33,4 +33,4 @@ Create the delayed_job tables with migration:
 		down do
 			drop_table(:delayed_jobs)
 		end
-end
+	end

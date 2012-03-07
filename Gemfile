@@ -1,5 +1,5 @@
 source 'http://rubygems.org'
-gem 'delayed_job', :git => 'git@github.com:farmisen/delayed_job.git'
+gem 'delayed_job', "~> 3.0"
 gem 'sequel'
 
 group :development do

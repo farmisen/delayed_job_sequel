@@ -3,15 +3,15 @@ module Delayed
     module Sequel
       class Job < ::Sequel::Model(:delayed_jobs)
         include Delayed::Backend::Base
-        class <<self
-#          alias :create! :create
-        end
-#        alias :save! :save
-#        alias :update_attributes :update
+
+        alias :save! :save
+        alias :update_attributes :update
         
-        def self.before_fork 
+        def self.before_fork
+          ::Sequel::DATABASES.each {|d| d.disconnect }
         end
-        def self.after_fork 
+        def self.after_fork
+          ::Sequel::DATABASES.each {|d| d.connect(d.uri)} 
         end
         
         def before_save
