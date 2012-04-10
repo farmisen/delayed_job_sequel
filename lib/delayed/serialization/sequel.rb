@@ -1,4 +1,4 @@
-class Sequel::Model
+class ::Sequel::Model
   yaml_as "tag:ruby.yaml.org,2002:Sequel"
 
   def self.yaml_new(klass, tag, val)
